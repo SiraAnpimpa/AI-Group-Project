@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#126c61" />
+  <meta name="description" content="วิเคราะห์มุม ระยะเอื้อม และรอบยกจากวิดีโอ โครงงานกลุ่ม G07" />
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <title>G07 · วิเคราะห์การยก</title>
+</head>
+<body>
+  <a class="skip-link" href="#results">ข้ามไปผลวิเคราะห์</a>
+  <header class="app-header">
+    <a class="brand" href="./" aria-label="G07 หน้าหลัก"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 23V9l11-5 11 5v14l-11 5Z M5 9l11 5 11-5 M16 14v14"/><path d="m9 20 4-3 4 2 6-5"/></svg><span>G07 <span class="brand-secondary">Lifting Analysis</span></span></a>
+    <div class="header-actions"><button id="import-button" class="button secondary" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h7l2 3h9v10H3Z M3 7V4h7l2 3h7v3"/></svg>เปิดผลเดิม</button><button id="help-button" class="button quiet" type="button" aria-expanded="false" aria-controls="help-panel">วิธีใช้</button></div>
+  </header>
+  <div class="workspace">
+    <aside class="setup" aria-label="ตั้งค่าคลิป">
+      <h1>วิเคราะห์การยก</h1>
+      <p class="setup-intro">เลือกคลิป แล้วดูการเคลื่อนไหวไปพร้อมกับผลวิเคราะห์</p>
+      <div id="dropzone" class="file-picker">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg>
+        <button id="choose-button" class="button secondary" type="button">เลือกวิดีโอ</button>
+        <span id="file-name" class="file-name">หรือลากไฟล์มาวางตรงนี้</span>
+        <span class="file-format">MP4, MOV, WebM</span>
+      </div>
+      <div class="field"><label for="subject">ผู้ยก</label><select id="subject"><option value="custom">กำหนดส่วนสูงเอง</option></select></div>
+      <div class="field"><label for="height">ส่วนสูงจริง</label><div class="input-unit"><input id="height" type="number" min="50" max="250" step="0.1" placeholder="กรอกส่วนสูง" inputmode="decimal" required /><span>ซม.</span></div></div>
+      <button id="manifest-button" class="button quiet" type="button" style="font-size:12px;padding-left:0;margin-top:8px">นำเข้าส่วนสูงจาก manifest</button>
+      <details id="advanced"><summary>ตั้งค่าเพิ่มเติม<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+        <div class="advanced-fields">
+          <h2>ช่วงยืนอ้างอิง</h2>
+          <label class="check"><input id="auto-calibrate" type="checkbox" checked />ค้นหาช่วงยืนตรงอัตโนมัติ</label>
+          <div class="field-pair"><div class="field"><label for="calib-start">เวลาเริ่ม (วินาที)</label><input id="calib-start" type="number" min="0" step="0.1" value="0" /></div><div class="field"><label for="calib-seconds">ความยาว (วินาที)</label><input id="calib-seconds" type="number" min="0.2" max="30" step="0.1" value="1.5" /></div></div>
+          <h2>การนับรอบ</h2>
+          <div class="field"><label for="excursion">ระยะเคลื่อนขั้นต่ำ (ซม.)</label><input id="excursion" type="number" min="1" step="1" value="20" /></div>
+          <div class="field"><label for="return-excursion">ระยะลดมือก่อนรอบถัดไป (ซม.)</label><input id="return-excursion" type="number" min="1" step="1" value="18" /></div>
+          <div class="field-pair"><div class="field"><label for="dwell">เวลายืนยัน (วินาที)</label><input id="dwell" type="number" min="0" step="0.01" value="0.12" /></div><div class="field"><label for="interval">ห่างระหว่างรอบ</label><input id="interval" type="number" min="0" step="0.1" value="0.6" /></div></div>
+          <div class="field"><label for="confirm-level">ระดับมือยืนยันการยก</label><select id="confirm-level"><option value="waist">ถึงระดับเอว</option><option value="hip">ถึงระดับสะโพก</option><option value="none">ใช้ระยะเคลื่อนอย่างเดียว</option></select></div>
+          <div class="field"><label for="expected">จำนวนจริงสำหรับเปรียบเทียบ</label><input id="expected" type="number" min="0" step="1" placeholder="เว้นว่างได้" /></div>
+          <h2>การประมวลผล</h2>
+          <div class="field"><label for="fps">อัตราวิเคราะห์ (เฟรม/วินาที)</label><input id="fps" type="number" min="5" max="120" step="0.01" value="30" /><p id="fps-note" class="field-note">อ่านอัตราเฟรมจากคลิปเมื่อเลือกไฟล์</p></div>
+          <div class="field"><label for="fov">มุมมองกล้อง (องศา)</label><input id="fov" type="number" min="30" max="120" step="1" value="70" /></div>
+          <button id="reset-settings" class="button quiet" type="button">คืนค่าตั้งต้น</button>
+        </div>
+      </details>
+      <div class="analysis-action"><button id="analyze" class="button primary" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg>เริ่มวิเคราะห์</button><button id="cancel" class="button secondary" type="button" hidden>ยกเลิก</button><p class="local-note"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>คลิปประมวลผลในเครื่องของคุณ</p></div>
+      <section id="help-panel" class="help-panel" hidden><h2>เริ่มใช้งาน</h2><ol><li>เลือกคลิปที่เห็นผู้ยกเต็มตัวและมีช่วงยืนตรง</li><li>ใส่ส่วนสูงจริง แล้วกดเริ่มวิเคราะห์</li><li>เล่นวิดีโอหรือคลิกรอบยกเพื่อดูผลในช่วงนั้น</li><li>ดาวน์โหลดผลเก็บไว้เปิดภายหลัง</li></ol><p>หากเปิด MOV ไม่ได้ ให้แปลงเป็น MP4 แบบ H.264 ก่อน</p></section>
+    </aside>
+    <main id="results" class="results" tabindex="-1">
+      <div class="results-heading"><div><h2>ผลการวิเคราะห์</h2><p id="result-name">ยังไม่มีผลวิเคราะห์</p></div><div class="export-actions"><button id="export-button" class="button secondary" type="button" disabled popovertarget="export-menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5 M4 16v5h16v-5"/></svg>ดาวน์โหลดผล</button><div id="export-menu" popover><button id="export-zip" type="button">ผลทั้งหมด (.zip)</button><button id="export-csv" type="button">ข้อมูลรายเฟรม (.csv)</button><button id="export-video" type="button">วิดีโอพร้อมผล (.webm)</button></div></div></div>
+      <div id="status-line" class="status-line" role="status" aria-live="polite"><span class="status-dot"></span><span id="status">พร้อมเริ่มวิเคราะห์</span></div>
+      <div id="progress-wrap" class="progress-wrap" hidden><progress id="progress" value="0" max="100" aria-label="ความคืบหน้าการวิเคราะห์"></progress><span id="progress-text">0%</span></div>
+      <div id="error" class="error" role="alert" hidden></div>
+      <section class="review" aria-label="วิดีโอและผลในช่วงที่เลือก">
+        <div class="media-column">
+          <div id="video-stage" class="video-stage">
+            <div id="empty-stage" class="empty-stage"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="10" width="34" height="28" rx="3"/><path d="m20 18 10 6-10 6Z"/></svg><h3>ดูทุกการยกได้ในภาพเดียว</h3><p>เลือกวิดีโอเพื่อเริ่มวิเคราะห์<br />มุม ระยะเอื้อม และจำนวนครั้ง</p></div>
+            <video id="video" playsinline preload="auto" hidden></video><canvas id="overlay" aria-hidden="true" hidden></canvas>
+          </div>
+          <div class="playback"><button id="play" class="button icon-button secondary" type="button" aria-label="เล่นวิดีโอ" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path id="play-icon" d="m9 5 10 7-10 7Z"/></svg></button><input id="seek" type="range" min="0" max="1" step="0.01" value="0" aria-label="ตำแหน่งวิดีโอ" disabled /><span id="time">00:00 / 00:00</span><button id="overlay-toggle" class="button icon-button quiet" type="button" aria-label="ซ่อนเส้นข้อต่อ" aria-pressed="true" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m2 12 4-6h12l4 6-4 6H6Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        </div>
+        <aside class="inspector" aria-label="ผลในช่วงที่เลือก"><div class="inspector-heading"><h3>ช่วงที่เลือก</h3><span id="frame-time">00:00</span></div><dl class="live-values"><div><dt>ยกสะสม</dt><dd><span id="live-count">—</span><small>ครั้ง</small></dd></div><div><dt>ระยะเอื้อม H</dt><dd><span id="live-h">—</span><small>ซม.</small></dd></div><div><dt>ความสูงมือ V</dt><dd><span id="live-v">—</span><small>ซม.</small></dd></div><div><dt>มุมบิดตัว</dt><dd><span id="live-twist">—</span><small>°</small></dd></div><div><dt>มุมก้มลำตัว</dt><dd><span id="live-bend">—</span><small>°</small></dd></div></dl><div class="demo-result"><span>น้ำหนักตามตาราง Demo</span><strong><span id="live-weight">—</span> <small>กก.</small></strong><p id="live-zone">รอผลวิเคราะห์</p></div></aside>
+      </section>
+      <section class="summary-strip" aria-label="ผลรวมทั้งคลิป"><div><span>ยกทั้งหมด</span><strong id="total-count">—<small>ครั้ง</small></strong></div><div><span>ระยะเอื้อมสูงสุด</span><strong id="max-h">—<small>ซม.</small></strong></div><div><span>มุมบิดสูงสุด</span><strong id="max-twist">—<small>°</small></strong></div></section>
+      <section class="data-section"><div class="data-toolbar"><div class="tabs" role="tablist" aria-label="รายละเอียดผล"><button id="tab-chart" role="tab" aria-selected="true" aria-controls="panel-chart" type="button">กราฟ</button><button id="tab-lifts" role="tab" aria-selected="false" aria-controls="panel-lifts" tabindex="-1" type="button">รอบยก<span id="event-count" class="tab-count" hidden></span></button><button id="tab-frames" role="tab" aria-selected="false" aria-controls="panel-frames" tabindex="-1" type="button">รายเฟรม</button><button id="tab-details" role="tab" aria-selected="false" aria-controls="panel-details" tabindex="-1" type="button">รายละเอียด</button></div><select id="chart-mode" aria-label="เลือกข้อมูลกราฟ"><option value="reach">ระยะเอื้อมและความสูงมือ</option><option value="angles">มุมบิดและมุมก้มลำตัว</option><option value="knees">มุมเข่าซ้ายและขวา</option><option value="count">จำนวนครั้งสะสม</option></select></div>
+        <div id="panel-chart" role="tabpanel" aria-labelledby="tab-chart"><div id="chart-empty" class="data-empty">วิเคราะห์คลิปเพื่อดูการเปลี่ยนแปลงตลอดการยก</div><div id="chart-content" hidden><div class="chart-legend"><span id="legend-a"><i></i>ระยะเอื้อม H</span><span id="legend-b"><i></i>ความสูงมือ V</span><small id="chart-unit">ซม.</small></div><canvas id="chart" role="img" aria-label="กราฟผลวิเคราะห์ตามเวลา คลิกเพื่อเลื่อนวิดีโอ"></canvas><p class="chart-hint">คลิกบนกราฟเพื่อดูวิดีโอในช่วงนั้น</p></div></div>
+        <div id="panel-lifts" role="tabpanel" aria-labelledby="tab-lifts" hidden><div id="lifts-empty" class="data-empty">รายการรอบยกจะแสดงหลังวิเคราะห์</div><div id="lifts-list" class="lifts-list"></div></div>
+        <div id="panel-frames" role="tabpanel" aria-labelledby="tab-frames" hidden><div class="frame-tools"><span id="frame-range">ยังไม่มีข้อมูลรายเฟรม</span><div><button id="prev-page" class="button quiet" type="button" disabled>ก่อนหน้า</button><button id="next-page" class="button quiet" type="button" disabled>ถัดไป</button></div></div><div class="table-scroll"><table><thead><tr><th>เวลา (วิ.)</th><th>เอื้อม (ซม.)</th><th>สูง (ซม.)</th><th>บิด (°)</th><th>ก้ม (°)</th><th>จำนวนครั้ง</th></tr></thead><tbody id="frames-body"></tbody></table></div></div>
+        <div id="panel-details" role="tabpanel" aria-labelledby="tab-details" hidden><dl id="details-list" class="details-list"><div><dt>ข้อมูลการวิเคราะห์</dt><dd>จะแสดงหลังวิเคราะห์คลิป</dd></div></dl></div>
+      </section>
+      <footer class="workspace-footer"><span>G07 · โครงงาน Lifting Weight Limit</span><span id="duration-label">วิเคราะห์ทีละคลิป</span></footer>
+    </main>
+  </div>
+  <input id="file-input" type="file" accept="video/*,.mp4,.mov,.webm,.m4v" hidden />
+  <input id="import-input" type="file" accept=".zip,application/zip" hidden />
+  <input id="manifest-input" type="file" accept=".csv,text/csv" hidden />
+  <video id="decoder" muted playsinline preload="auto" class="decoder" aria-hidden="true"></video>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

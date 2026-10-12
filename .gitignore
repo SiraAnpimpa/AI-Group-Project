@@ -1,0 +1,17 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+public/runtime/
+public/models/
+tests/fixtures/
+tests/import-export.spec.js
+public/licenses/
+public/THIRD_PARTY_NOTICES.md
+*.log
+.DS_Store
+.env*
+*.mp4
+*.mov
+*.webm
+*.csv
